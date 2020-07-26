@@ -21,8 +21,8 @@
 
         // connect to database
         $servername = "149.28.176.33";
-        $username = "admin_web";
-        $password = "3979PxRPgnB3cBe";
+        $username = "rxzpnkmyzd";
+        $password = "%";
 
         try {
             $conn = new PDO("mysql:host=$servername; dbname=rxzpnkmyzd", $username, $password);
