@@ -20,7 +20,7 @@
         $_SESSION["country_name"] = "";
 
         // connect to database
-        $servername = "%";
+        $servername = "localhost";
         $username = "rxzpnkmyzd";
         $password = "TANGquan2013";
 
