@@ -90,24 +90,24 @@
                 // convert country code to lower case. For example, 'AF' to 'af'
                 $country_code = strtolower($country_code);
 
-                // retrieve news from News API
-                $response = file_get_contents('https://newsapi.org/v2/top-headlines?country='.$country_code.'&q='.$_SESSION["keyword"].'&apiKey=db99c3dc50e84ac280144f02b64119d1');
+                // retrieve top 10 news from News API
+                $response = file_get_contents('https://newsapi.org/v2/top-headlines?pageSize=10country='.$country_code.'&q='.$_SESSION["keyword"].'&apiKey=db99c3dc50e84ac280144f02b64119d1');
                 $response_JSON_array = json_decode($response, true);
 
                 // display top 10 news 
-                for($count = 0; $count<10; $count++){
+                foreach($response_JSON_array['articles'] as $element){
                     // $title is the headline
-                    $title = $response_JSON_array['articles'][$count]['title'];
+                    $title = $element['title'];
                     // make sure that the headline contains the keyword (regardless of uppercase or lowercase)
                     if((strpos(strtolower($title), strtolower($_SESSION["keyword"])) !== false && $_SESSION["keyword"] != "") || $_SESSION["keyword"] == "" ){
             ?><h5 class="text-center"><?php print_r($title);?></h5>
             <p>
                 <?php
                         echo "<br>";
-                        print_r($response_JSON_array['articles'][$count]['description']);
+                        print_r($element['description']);
                         echo "<br>";
                     } // if statement ends 
-                } // for-loop ends
+                } // foreach ends
 
                 } catch(PDOException $e) {
                     echo "Connection failed: " . $e->getMessage();
