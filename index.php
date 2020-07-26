@@ -23,7 +23,7 @@
         // connect to database
         $servername = "localhost";
         $username = "rxzpnkmyzd";
-        $password = "*402CD06FE12ACDCC34CB198D521928F0AAF4E194";
+        $password = "Aa123456789";
 
         try {
             $conn = new PDO("mysql:host=$servername; dbname=rxzpnkmyzd", $username, $password);
