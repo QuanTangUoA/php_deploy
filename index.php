@@ -20,12 +20,12 @@
         $_SESSION["country_name"] = "";
 
         // connect to database
-        $servername = "localhost";
-        $username = "root";
-        $password = "tqwc123456789";
+        $servername = "149.28.176.33";
+        $username = "admin_web";
+        $password = "3979PxRPgnB3cBe";
 
         try {
-            $conn = new PDO("mysql:host=$servername; dbname=homework", $username, $password);
+            $conn = new PDO("mysql:host=$servername; dbname=rxzpnkmyzd", $username, $password);
             // set the PDO error mode to exception
             $conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
             // echo "Connected successfully";
