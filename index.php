@@ -91,7 +91,7 @@
                 $country_code = strtolower($country_code);
 
                 // retrieve top 10 news from News API
-                $response = file_get_contents('https://newsapi.org/v2/top-headlines?pageSize=10country='.$country_code.'&q='.$_SESSION["keyword"].'&apiKey=db99c3dc50e84ac280144f02b64119d1');
+                $response = file_get_contents('https://newsapi.org/v2/top-headlines?pageSize=10&country='.$country_code.'&q='.$_SESSION["keyword"].'&apiKey=db99c3dc50e84ac280144f02b64119d1');
                 $response_JSON_array = json_decode($response, true);
 
                 // display top 10 news 
