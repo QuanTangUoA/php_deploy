@@ -6,7 +6,7 @@
     <meta charset="utf-8">
     <meta name="viewsport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
     <meta http-equiv="x-ua-compatible" content="ie=edge">
-    <title>*The Daily Paper*</title>
+    <title>The Daily Paper</title>
     <!-- Bootstrap CSS -->
     <link rel ="stylesheet" href="style.css">
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/css/bootstrap.min.css" integrity="sha384-9aIt2nRpC12Uk9gS9baDl411NQApFmC26EwAOH8WgZl5MYYxFfc+NcPb1dKGj7Sk" crossorigin="anonymous">
@@ -14,22 +14,22 @@
 <body>
     <?php
         // define global variables. 
-        // They could be 'Afghanistan', 'AF' and "covid19" repectively (key is the keyword you search).
-        $country_name = $country_code = $key = "";
+        // They could be 'Afghanistan', 'AF' repectively.
+        $country_name = $country_code = "";
         
         $_SESSION["country_name"] = "";
-
+        $_SESSION["keyword"] = "";
+        
         // connect to database
         $servername = "localhost";
         $username = "rxzpnkmyzd";
-        $password = "TANGquan2013";
+        $password = "*402CD06FE12ACDCC34CB198D521928F0AAF4E194";
 
         try {
             $conn = new PDO("mysql:host=$servername; dbname=rxzpnkmyzd", $username, $password);
             // set the PDO error mode to exception
             $conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
             // echo "Connected successfully";
-
             
             // create table country
             /* $tb = "CREATE TABLE country (Code VARCHAR(5) UNIQUE, Name VARCHAR(50) UNIQUE);";
@@ -53,6 +53,7 @@
         <form class="text-center" action="<?php echo htmlspecialchars($_SERVER["PHP_SELF"]);?>" method="POST">
             <select class="width-30p height-40px margin-5px" name = 'country_name'>
             <?php
+                // insert names for 248 countries
                 foreach($country_array as $country){
                     ?><option id = <?php echo '"'.$country['Name'].'"' ?>><?php 
                     echo $country['Name'];
@@ -61,7 +62,7 @@
             ?>
             </select>
             <br>
-            <input type="text" id="keyword" class="width-30p height-40px margin-5px" name="key"><br>
+            <input type="text" class="width-30p height-40px margin-5px" name="key" id="keyword"><br>
             <input class="btn btn-primary width-30p height-40px margin-5px" type="submit" value="Submit">
         </form>
         <div class="text-center">
@@ -76,43 +77,52 @@
                     // update session, which is the country name in the previous select tag
                     $_SESSION["country_name"] = $country_name;
 
+                    // keep record of the keyword before page refresh
+                    $_SESSION["keyword"] = $_POST["key"];
+
                     // get the 2-letter country code according to the country name.
                     $stmt = $conn->query('select Code from country where Name = '.'"'.$country_name.'"');
                     $country_code = $stmt->FETCH(PDO::FETCH_ASSOC);
 
                     // $stmt->FETCH(PDO::FETCH_ASSOC) returns an array so need to be more specific here
                     $country_code = $country_code['Code'];
-
-                    $key = $_POST["key"];
-
-
                 }
-
                 // convert country code to lower case. For example, 'AF' to 'af'
                 $country_code = strtolower($country_code);
 
                 // retrieve news from News API
-                $response = file_get_contents('https://newsapi.org/v2/top-headlines?country='.$country_code.'&q='.$key.'&apiKey=db99c3dc50e84ac280144f02b64119d1');
+                $response = file_get_contents('https://newsapi.org/v2/top-headlines?country='.$country_code.'&q='.$_SESSION["keyword"].'&apiKey=db99c3dc50e84ac280144f02b64119d1');
                 $response_JSON_array = json_decode($response, true);
 
-                // retrieve top 10 news 
+                // display top 10 news 
                 for($count = 0; $count<10; $count++){
-            ?><h5 class="text-center"><?php print_r($response_JSON_array['articles'][$count]['title']);?></h5>
+                    // $title is the headline
+                    $title = $response_JSON_array['articles'][$count]['title'];
+                    // make sure that the headline contains the keyword (regardless of uppercase or lowercase)
+                    if((strpos(strtolower($title), strtolower($_SESSION["keyword"])) !== false && $_SESSION["keyword"] != "") || $_SESSION["keyword"] == "" ){
+            ?><h5 class="text-center"><?php print_r($title);?></h5>
             <p>
                 <?php
-                    echo "<br>";
-                    print_r($response_JSON_array['articles'][$count]['description']);
-                    echo "<br>";
-                }  
+                        echo "<br>";
+                        print_r($response_JSON_array['articles'][$count]['description']);
+                        echo "<br>";
+                    } // if statement ends 
+                } // for-loop ends
+
                 } catch(PDOException $e) {
                     echo "Connection failed: " . $e->getMessage();
-                    }
-                    $conn = null;
+                  }
+
+                // connection ends
+                $conn = null;
                 ?>
             </p>
         </div>
     <script>
+        // having the option tag which has the country name you searched selected.
         document.getElementById(<?php echo '"'.$_SESSION["country_name"].'"' ?>).selected = "selected";
+        // the input box keeps the value before page refresh occurs
+        document.getElementById("keyword").value = <?php echo '"'.$_SESSION["keyword"].'"' ?>;
     </script>
     </div>
 </body>
