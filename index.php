@@ -47,72 +47,70 @@
             }*/
 
     ?>
-    <div class = "container">
-        <div class="jumbotron">
-            <h1 class="display-4 text-center">The Daily Paper</h1>
-            <hr class="my-4">
-            <form class="text-center" action="<?php echo htmlspecialchars($_SERVER["PHP_SELF"]);?>" method="POST">
-                <select class="width-30p height-40px margin-5px" name = 'country_name'>
+    <div class="jumbotron">
+        <h1 class="display-4 text-center">The Daily Paper</h1>
+        <hr class="my-4">
+        <form class="text-center" action="<?php echo htmlspecialchars($_SERVER["PHP_SELF"]);?>" method="POST">
+            <select class="width-30p height-40px margin-5px" name = 'country_name'>
+            <?php
+                foreach($country_array as $country){
+                    ?><option id = <?php echo '"'.$country['Name'].'"' ?>><?php 
+                    echo $country['Name'];
+                    ?></option><?php
+                }
+            ?>
+            </select>
+            <br>
+            <input type="text" id="keyword" class="width-30p height-40px margin-5px" name="key"><br>
+            <input class="btn btn-primary width-30p height-40px margin-5px" type="submit" value="Submit">
+        </form>
+        <div class="text-center">
+            <?php
+                if ($_SERVER["REQUEST_METHOD"] == "POST") {
+                    // import teh global variables
+                    global $country_name, $country_code, $key;
+
+                    // get the value of the select tag, eg, the country name.
+                    $country_name = $_POST["country_name"];
+
+                    // update session, which is the country name in the previous select tag
+                    $_SESSION["country_name"] = $country_name;
+
+                    // get the 2-letter country code according to the country name.
+                    $stmt = $conn->query('select Code from country where Name = '.'"'.$country_name.'"');
+                    $country_code = $stmt->FETCH(PDO::FETCH_ASSOC);
+
+                    // $stmt->FETCH(PDO::FETCH_ASSOC) returns an array so need to be more specific here
+                    $country_code = $country_code['Code'];
+
+                    $key = $_POST["key"];
+
+
+                }
+
+                // convert country code to lower case. For example, 'AF' to 'af'
+                $country_code = strtolower($country_code);
+
+                // retrieve news from News API
+                $response = file_get_contents('https://newsapi.org/v2/top-headlines?country='.$country_code.'&q='.$key.'&apiKey=db99c3dc50e84ac280144f02b64119d1');
+                $response_JSON_array = json_decode($response, true);
+
+                // retrieve top 10 news 
+                for($count = 0; $count<10; $count++){
+            ?><h5 class="text-center"><?php print_r($response_JSON_array['articles'][$count]['title']);?></h5>
+            <p>
                 <?php
-                    foreach($country_array as $country){
-                        ?><option id = <?php echo '"'.$country['Name'].'"' ?>><?php 
-                        echo $country['Name'];
-                        ?></option><?php
+                    echo "<br>";
+                    print_r($response_JSON_array['articles'][$count]['description']);
+                    echo "<br>";
+                }  
+                } catch(PDOException $e) {
+                    echo "Connection failed: " . $e->getMessage();
                     }
+                    $conn = null;
                 ?>
-                </select>
-                <br>
-                <input type="text" id="keyword" class="width-30p height-40px margin-5px" name="key"><br>
-                <input class="btn btn-primary width-30p height-40px margin-5px" type="submit" value="Submit">
-            </form>
-            <div class="text-center">
-                <?php
-                    if ($_SERVER["REQUEST_METHOD"] == "POST") {
-                        // import teh global variables
-                        global $country_name, $country_code, $key;
-
-                        // get the value of the select tag, eg, the country name.
-                        $country_name = $_POST["country_name"];
-                        
-                        // update session, which is the country name in the previous select tag
-                        $_SESSION["country_name"] = $country_name;
-
-                        // get the 2-letter country code according to the country name.
-                        $stmt = $conn->query('select Code from country where Name = '.'"'.$country_name.'"');
-                        $country_code = $stmt->FETCH(PDO::FETCH_ASSOC);
-
-                        // $stmt->FETCH(PDO::FETCH_ASSOC) returns an array so need to be more specific here
-                        $country_code = $country_code['Code'];
-
-                        $key = $_POST["key"];
-
-
-                    }
-
-                    // convert country code to lower case. For example, 'AF' to 'af'
-                    $country_code = strtolower($country_code);
-
-                    // retrieve news from News API
-                    $response = file_get_contents('https://newsapi.org/v2/top-headlines?country='.$country_code.'&q='.$key.'&apiKey=db99c3dc50e84ac280144f02b64119d1');
-                    $response_JSON_array = json_decode($response, true);
-
-                    // retrieve top 10 news 
-                    for($count = 0; $count<10; $count++){
-                ?><h5 class="text-center"><?php print_r($response_JSON_array['articles'][$count]['title']);?></h5>
-                <p>
-                    <?php
-                        echo "<br>";
-                        print_r($response_JSON_array['articles'][$count]['description']);
-                        echo "<br>";
-                    }  
-                    } catch(PDOException $e) {
-                        echo "Connection failed: " . $e->getMessage();
-                        }
-                        $conn = null;
-                    ?>
-                </p>
-            </div>
-    </div>
+            </p>
+        </div>
     <script>
         document.getElementById(<?php echo '"'.$_SESSION["country_name"].'"' ?>).selected = "selected";
     </script>
